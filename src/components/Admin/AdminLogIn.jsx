@@ -40,6 +40,11 @@ const AdminLogIn = () => {
         onSubmit={handleSubmit}
         className="w-1/5 mx-auto flex flex-col space-y-5"
       >
+        <h1 className="font-bold text-4xl mb-7 font-['Lemon']">
+          <span className="text-blue-800">Travel</span>
+          <span className="text-blue-500">Vibes</span>
+          <span className="text-xs">Admin</span>
+        </h1>
         <FormInput
           name="Email"
           type="text"
