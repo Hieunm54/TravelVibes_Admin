@@ -57,7 +57,7 @@ const AdminLogIn = () => {
           value={password}
           onChange={(event) => setPassword(event.target.value)}
         />
-        <Button>Sign In</Button>
+        <Button type={"submit"}>Sign In</Button>
       </form>
     </main>
   );

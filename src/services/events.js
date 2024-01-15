@@ -3,7 +3,7 @@ import { authorizationHeader } from "./jwt";
 import { CONST } from "../constaints";
 
 export const getEventDetail = async (id, token) => {
-  return axios.get(`${CONST.API_URL}/api/events/${id}`, {
+  return axios.get(`${CONST.API_URL}/api/admin/events/${id}`, {
     headers: {
       Authorization: authorizationHeader(token),
     },
