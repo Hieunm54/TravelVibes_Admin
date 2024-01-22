@@ -20,9 +20,9 @@ const AdminEventItem = ({
 
   const handleSelectEventState = (status) => {
     if (status === event.status) {
+      setIsSelectingEventState(false);
       return;
     }
-    console.log("hieu status ", status);
 
     dispatch(updateEventStatusAsync(event._id, status));
     // setEventState(status);

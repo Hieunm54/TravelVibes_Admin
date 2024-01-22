@@ -8,13 +8,20 @@ import AdminEventItem from "../components/Admin/AdminEventItem";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllEventsAsync } from "../store/actions/events";
 import { sGetAllEventsForAdmin } from "../store/selectors";
+import RefreshButton from "../components/Button/RefreshButton";
 
 const AdminEventList = () => {
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState(0);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const events = useSelector(sGetAllEventsForAdmin);
+
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState(0);
+  const [searchValue, setSearchValue] = useState("");
+
+  useEffect(() => {
+    dispatch(getAllEventsAsync());
+  }, [dispatch]);
 
   const handleLogOut = () => {
     localStorage.removeItem("adminToken");
@@ -27,9 +34,36 @@ const AdminEventList = () => {
     setOpenModal(true);
   };
 
-  useEffect(() => {
+  const handleChange = (event) => {
+    const textValue = event.target.value;
+    setSearchValue(textValue);
+  };
+
+  const handleRefresh = async () => {
     dispatch(getAllEventsAsync());
-  }, [dispatch]);
+  };
+
+  const renderBody = () => {
+    let filteredEvents = events;
+
+    if (searchValue.trim() !== "") {
+      filteredEvents = events.filter((event) =>
+        event.name.toLowerCase().includes(searchValue.trim().toLowerCase())
+      );
+    }
+
+    return filteredEvents.length === 0 ? (
+      <div className="flex justify-start font-medium px-4">No events match</div>
+    ) : (
+      filteredEvents.map((event) => (
+        <AdminEventItem
+          key={event._id}
+          event={event}
+          handleChooseEvent={handleChooseEvent}
+        />
+      ))
+    );
+  };
 
   return (
     <main className="h-screen overflow-hidden grid grid-cols-4">
@@ -65,6 +99,15 @@ const AdminEventList = () => {
         </nav>
       </aside>
       <section className="col-span-3 flex flex-col h-screen overflow-auto">
+        <div className="p-4 flex justify-start sticky top-0 z-50">
+          <input
+            className="flex-1 border mr-2 rounded-xl p-2 resize-none max-w-sm focus:outline-none bg-gray-100"
+            placeholder="Search"
+            value={searchValue}
+            onChange={handleChange}
+          />
+          <RefreshButton onRefresh={handleRefresh} />
+        </div>
         <CommonModal
           isOpen={openModal}
           onClose={() => setOpenModal(false)}
@@ -72,15 +115,7 @@ const AdminEventList = () => {
         >
           <Event id={selectedEventId} onClose={() => setOpenModal(false)} />
         </CommonModal>
-        {events.length === 0
-          ? "No events here"
-          : events.map((event) => (
-              <AdminEventItem
-                key={event._id}
-                event={event}
-                handleChooseEvent={handleChooseEvent}
-              />
-            ))}
+        {events.length === 0 ? "No events" : renderBody()}
       </section>
     </main>
   );
