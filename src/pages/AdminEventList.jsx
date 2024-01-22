@@ -18,11 +18,10 @@ const AdminEventList = () => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState(0);
   const [searchValue, setSearchValue] = useState("");
-  const [filterEvents, setFilterEvents] = useState(events);
 
   useEffect(() => {
-    setFilterEvents(events);
-  }, [events]);
+    dispatch(getAllEventsAsync());
+  }, [dispatch]);
 
   const handleLogOut = () => {
     localStorage.removeItem("adminToken");
@@ -38,22 +37,32 @@ const AdminEventList = () => {
   const handleChange = (event) => {
     const textValue = event.target.value;
     setSearchValue(textValue);
-
-    let filteredEvents;
-
-    if (textValue.trim() !== "") {
-      filteredEvents = events.filter((event) =>
-        event.name.toLowerCase().includes(textValue.trim().toLowerCase())
-      );
-    } else {
-      filteredEvents = events;
-    }
-
-    setFilterEvents(filteredEvents);
   };
 
   const handleRefresh = async () => {
     dispatch(getAllEventsAsync());
+  };
+
+  const renderBody = () => {
+    let filteredEvents = events;
+
+    if (searchValue.trim() !== "") {
+      filteredEvents = events.filter((event) =>
+        event.name.toLowerCase().includes(searchValue.trim().toLowerCase())
+      );
+    }
+
+    return filteredEvents.length === 0 ? (
+      <div className="flex justify-start font-medium px-4">No events match</div>
+    ) : (
+      filteredEvents.map((event) => (
+        <AdminEventItem
+          key={event._id}
+          event={event}
+          handleChooseEvent={handleChooseEvent}
+        />
+      ))
+    );
   };
 
   return (
@@ -96,13 +105,8 @@ const AdminEventList = () => {
             placeholder="Search"
             value={searchValue}
             onChange={handleChange}
-            // ref={textareaRef}
           />
           <RefreshButton onRefresh={handleRefresh} />
-
-          {/* <button onClick={handleRefresh} className="">
-            <FontAwesomeIcon icon="fa-solid fa-arrows-rotate" />
-          </button> */}
         </div>
         <CommonModal
           isOpen={openModal}
@@ -111,15 +115,7 @@ const AdminEventList = () => {
         >
           <Event id={selectedEventId} onClose={() => setOpenModal(false)} />
         </CommonModal>
-        {filterEvents.length === 0
-          ? "No events here"
-          : filterEvents.map((event) => (
-              <AdminEventItem
-                key={event._id}
-                event={event}
-                handleChooseEvent={handleChooseEvent}
-              />
-            ))}
+        {events.length === 0 ? "No events" : renderBody()}
       </section>
     </main>
   );
