@@ -99,7 +99,7 @@ const AdminEventList = () => {
         </nav>
       </aside>
       <section className="col-span-3 flex flex-col h-screen overflow-auto">
-        <div className="p-4 flex justify-start ">
+        <div className="p-4 flex justify-start sticky top-0 z-50">
           <input
             className="flex-1 border mr-2 rounded-xl p-2 resize-none max-w-sm focus:outline-none bg-gray-100"
             placeholder="Search"
