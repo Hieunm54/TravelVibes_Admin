@@ -8,13 +8,21 @@ import AdminEventItem from "../components/Admin/AdminEventItem";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllEventsAsync } from "../store/actions/events";
 import { sGetAllEventsForAdmin } from "../store/selectors";
+import RefreshButton from "../components/Button/RefreshButton";
 
 const AdminEventList = () => {
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedEventId, setSelectedEventId] = useState(0);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const events = useSelector(sGetAllEventsForAdmin);
+
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState(0);
+  const [searchValue, setSearchValue] = useState("");
+  const [filterEvents, setFilterEvents] = useState(events);
+
+  useEffect(() => {
+    setFilterEvents(events);
+  }, [events]);
 
   const handleLogOut = () => {
     localStorage.removeItem("adminToken");
@@ -27,9 +35,26 @@ const AdminEventList = () => {
     setOpenModal(true);
   };
 
-  useEffect(() => {
+  const handleChange = (event) => {
+    const textValue = event.target.value;
+    setSearchValue(textValue);
+
+    let filteredEvents;
+
+    if (textValue.trim() !== "") {
+      filteredEvents = events.filter((event) =>
+        event.name.toLowerCase().includes(textValue.trim().toLowerCase())
+      );
+    } else {
+      filteredEvents = events;
+    }
+
+    setFilterEvents(filteredEvents);
+  };
+
+  const handleRefresh = async () => {
     dispatch(getAllEventsAsync());
-  }, [dispatch]);
+  };
 
   return (
     <main className="h-screen overflow-hidden grid grid-cols-4">
@@ -65,6 +90,20 @@ const AdminEventList = () => {
         </nav>
       </aside>
       <section className="col-span-3 flex flex-col h-screen overflow-auto">
+        <div className="p-4 flex justify-start ">
+          <input
+            className="flex-1 border mr-2 rounded-xl p-2 resize-none max-w-sm focus:outline-none bg-gray-100"
+            placeholder="Search"
+            value={searchValue}
+            onChange={handleChange}
+            // ref={textareaRef}
+          />
+          <RefreshButton onRefresh={handleRefresh} />
+
+          {/* <button onClick={handleRefresh} className="">
+            <FontAwesomeIcon icon="fa-solid fa-arrows-rotate" />
+          </button> */}
+        </div>
         <CommonModal
           isOpen={openModal}
           onClose={() => setOpenModal(false)}
@@ -72,9 +111,9 @@ const AdminEventList = () => {
         >
           <Event id={selectedEventId} onClose={() => setOpenModal(false)} />
         </CommonModal>
-        {events.length === 0
+        {filterEvents.length === 0
           ? "No events here"
-          : events.map((event) => (
+          : filterEvents.map((event) => (
               <AdminEventItem
                 key={event._id}
                 event={event}
